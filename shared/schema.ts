@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -19,10 +19,11 @@ export type SpreadsheetData = {
   [key: string]: CellData;
 };
 
+// Define the spreadsheet table schema
 export const spreadsheets = pgTable("spreadsheets", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  data: jsonb("data").$type<SpreadsheetData>().notNull(),
+  data: jsonb("data").$type<SpreadsheetData>().notNull().default({}),
 });
 
 export const insertSpreadsheetSchema = createInsertSchema(spreadsheets);

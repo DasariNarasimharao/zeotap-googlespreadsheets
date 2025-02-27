@@ -1,5 +1,6 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Cell } from "./Cell";
 import type { SpreadsheetData, CellData } from "@shared/schema";
 import { evaluateFormula } from "@/lib/formulas";
 
@@ -35,14 +36,6 @@ export default function Grid({ data, selectedCell, onSelectCell, onUpdateCell }:
     return cell.value;
   };
 
-  const handleDragStart = (cellId: string) => {
-    setDragStart(cellId);
-  };
-
-  const handleDragEnd = () => {
-    setDragStart(null);
-  };
-
   return (
     <ScrollArea className="h-[600px] border rounded-md">
       <div 
@@ -54,7 +47,7 @@ export default function Grid({ data, selectedCell, onSelectCell, onUpdateCell }:
         }}
       >
         {/* Column headers */}
-        <div className="bg-muted" />
+        <div className="bg-muted" key="corner" />
         {Array.from({ length: COLS }).map((_, i) => (
           <div 
             key={`col-${i}`}
@@ -66,9 +59,8 @@ export default function Grid({ data, selectedCell, onSelectCell, onUpdateCell }:
 
         {/* Row headers and cells */}
         {Array.from({ length: ROWS }).map((_, row) => (
-          <>
+          <React.Fragment key={`row-${row}`}>
             <div 
-              key={`row-${row}`}
               className="bg-muted flex items-center justify-center border-r font-medium"
             >
               {row + 1}
@@ -77,28 +69,24 @@ export default function Grid({ data, selectedCell, onSelectCell, onUpdateCell }:
               const cellId = getCellId(row, col);
               const cell = data[cellId];
               const isSelected = cellId === selectedCell;
-              
+
               return (
-                <div
+                <Cell
                   key={cellId}
-                  className={`border-r border-b px-2 relative cursor-cell
-                    ${isSelected ? 'ring-2 ring-primary' : ''}
-                    ${cell?.style?.bold ? 'font-bold' : ''}
-                    ${cell?.style?.italic ? 'italic' : ''}`}
-                  style={{
-                    color: cell?.style?.color,
-                    fontSize: cell?.style?.fontSize,
-                  }}
-                  onClick={() => onSelectCell(cellId)}
-                  draggable
-                  onDragStart={() => handleDragStart(cellId)}
-                  onDragEnd={handleDragEnd}
-                >
-                  {getCellValue(cellId)}
-                </div>
+                  id={cellId}
+                  value={getCellValue(cellId)}
+                  style={cell?.style}
+                  formula={cell?.formula}
+                  isSelected={isSelected}
+                  onSelect={() => onSelectCell(cellId)}
+                  onChange={(value) => onUpdateCell(cellId, {
+                    value,
+                    formula: value.startsWith('=') ? value : undefined
+                  })}
+                />
               );
             })}
-          </>
+          </React.Fragment>
         ))}
       </div>
     </ScrollArea>

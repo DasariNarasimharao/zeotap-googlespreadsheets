@@ -1,18 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import type { Cell as CellType } from '@shared/schema';
+import type { CellData } from '@shared/schema';
 
 interface CellProps {
   id: string;
   value: string;
-  format?: CellType['format'];
+  style?: CellData['style'];
   formula?: string;
   isSelected: boolean;
   onSelect: () => void;
   onChange: (value: string) => void;
 }
 
-export function Cell({ id, value, format, formula, isSelected, onSelect, onChange }: CellProps) {
+export function Cell({ id, value, style, formula, isSelected, onSelect, onChange }: CellProps) {
   const [editing, setEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -30,7 +30,7 @@ export function Cell({ id, value, format, formula, isSelected, onSelect, onChang
     setEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       setEditing(false);
       onChange(e.currentTarget.value);
@@ -42,8 +42,8 @@ export function Cell({ id, value, format, formula, isSelected, onSelect, onChang
       className={cn(
         'h-8 border-b border-r relative',
         isSelected && 'outline outline-2 outline-blue-500 z-10',
-        format?.bold && 'font-bold',
-        format?.italic && 'italic'
+        style?.bold && 'font-bold',
+        style?.italic && 'italic'
       )}
       onClick={onSelect}
       onDoubleClick={handleDoubleClick}

@@ -1,4 +1,4 @@
-import type { Spreadsheet, InsertSpreadsheet } from "@shared/schema";
+import type { Spreadsheet, InsertSpreadsheet, SpreadsheetData } from "@shared/schema";
 
 export interface IStorage {
   getSpreadsheet(id: number): Promise<Spreadsheet | undefined>;
@@ -21,7 +21,11 @@ export class MemStorage implements IStorage {
 
   async createSpreadsheet(spreadsheet: InsertSpreadsheet): Promise<Spreadsheet> {
     const id = this.currentId++;
-    const newSpreadsheet = { ...spreadsheet, id };
+    const newSpreadsheet: Spreadsheet = {
+      id,
+      name: spreadsheet.name,
+      data: spreadsheet.data || {}
+    };
     this.spreadsheets.set(id, newSpreadsheet);
     return newSpreadsheet;
   }
@@ -29,8 +33,12 @@ export class MemStorage implements IStorage {
   async updateSpreadsheet(id: number, spreadsheet: Partial<InsertSpreadsheet>): Promise<Spreadsheet | undefined> {
     const existing = this.spreadsheets.get(id);
     if (!existing) return undefined;
-    
-    const updated = { ...existing, ...spreadsheet };
+
+    const updated: Spreadsheet = {
+      ...existing,
+      name: spreadsheet.name || existing.name,
+      data: spreadsheet.data || existing.data
+    };
     this.spreadsheets.set(id, updated);
     return updated;
   }
