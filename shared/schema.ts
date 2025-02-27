@@ -1,0 +1,31 @@
+import { pgTable, text, serial, integer, jsonb } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export type CellStyle = {
+  bold?: boolean;
+  italic?: boolean;
+  fontSize?: number;
+  color?: string;
+};
+
+export type CellData = {
+  value: string;
+  formula?: string;
+  style?: CellStyle;
+};
+
+export type SpreadsheetData = {
+  [key: string]: CellData;
+};
+
+export const spreadsheets = pgTable("spreadsheets", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  data: jsonb("data").$type<SpreadsheetData>().notNull(),
+});
+
+export const insertSpreadsheetSchema = createInsertSchema(spreadsheets);
+
+export type InsertSpreadsheet = z.infer<typeof insertSpreadsheetSchema>;
+export type Spreadsheet = typeof spreadsheets.$inferSelect;
